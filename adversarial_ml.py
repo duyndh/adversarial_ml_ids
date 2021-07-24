@@ -101,14 +101,14 @@ def mlp_model_eval(X, Y, history, flag):
         
     if(len(np.unique(Y))) == 2:
         if(flag == 1): #Regular
-            fileName = 'ANN_Accuracy_over_Epoch_Binary_Classification_TRAbIDRegular.png'
+            fileName = 'ANN_Accuracy_over_Epoch_Binary_Classification_' + dataset_name + 'Regular.png'
         else: #Adversarial
-            fileName = 'ANN_Accuracy_over_Epoch_Binary_Classification_TRAbID_Adversarial.png'
+            fileName = 'ANN_Accuracy_over_Epoch_Binary_Classification_' + dataset_name + '_Adversarial.png'
     else:
         if(flag == 1): #Regular
-            fileName = 'ANN_Accuracy_over_Epoch_Multiclass_Classification_TRAbID_Regular.png'
+            fileName = 'ANN_Accuracy_over_Epoch_Multiclass_Classification_' + dataset_name + '_Regular.png'
         else: #Adversarial
-            fileName = 'ANN_Accuracy_over_Epoch_Multiclass_Classification_TRAbID_Adversarial.png'
+            fileName = 'ANN_Accuracy_over_Epoch_Multiclass_Classification_' + dataset_name + '_Adversarial.png'
     
     # Saving the figure
     myFig.savefig("TestResults\\" + fileName, format='png', dpi=1200)
@@ -132,14 +132,14 @@ def mlp_model_eval(X, Y, history, flag):
         
     if(len(np.unique(Y))) == 2:
         if(flag == 1): #Regular
-            fileName = 'ANN_Loss_over_Epoch_Binary_Classification_TRAbID_Regular.png'
+            fileName = 'ANN_Loss_over_Epoch_Binary_Classification_' + dataset_name + '_Regular.png'
         else: #Adversarial 
-            fileName = 'ANN_Loss_over_Epoch_Binary_Classification_TRAbID_Adversarial.png'
+            fileName = 'ANN_Loss_over_Epoch_Binary_Classification_' + dataset_name + '_Adversarial.png'
     else:
         if(flag == 1): #Regular
-            fileName = 'ANN_Loss_over_Epoch_Multiclass_Classification_TRAbID_Regular.png'
+            fileName = 'ANN_Loss_over_Epoch_Multiclass_Classification_' + dataset_name + '_Regular.png'
         else: #Adversarial
-            fileName = 'ANN_Loss_over_Epoch_Multiclass_Classification_TRAbID_Adversarial.png'
+            fileName = 'ANN_Loss_over_Epoch_Multiclass_Classification_' + dataset_name + '_Adversarial.png'
     
     # Saving the figure
     myFig.savefig("TestResults\\" + fileName, format='png', dpi=1200)
@@ -168,9 +168,9 @@ def mlp_model_eval(X, Y, history, flag):
         #plt.show()
         
         if(flag == 1): #Regular
-            fileName = 'ANN_Binary_Classification_ROC_TRAbID_Regular.png'
+            fileName = 'ANN_Binary_Classification_ROC_' + dataset_name + '_Regular.png'
         else: #Adversarial
-            fileName = 'ANN_Binary_Classification_ROC_TRAbID_Adversarial.png'
+            fileName = 'ANN_Binary_Classification_ROC_' + dataset_name + '_Adversarial.png'
 
         # Saving the figure
         myFig.savefig("TestResults\\" + fileName, format='png', dpi=1200)
@@ -204,40 +204,48 @@ import os
 if not os.path.exists("TestResults"):
     os.makedirs("TestResults")
 
+use_CICIDS2017_dataset = False
+dataset_name = ""
+
 #importing the data set
+
 # ==== Data processing for CICIDS 2017 ====
-'''dataset = pd.read_csv('../CICIDS2017/master.csv')
-print(dataset.head())
-print(dataset.shape)
+if use_CICIDS2017_dataset:
+    dataset_name = 'CICIDS2017'
+    dataset = pd.read_csv('CICIDS2017_dataset.csv')
+    print(dataset.head())
+    print(dataset.shape)
 
-# Some manual processing on the dataframe
-dataset = dataset.dropna()
-dataset = dataset.drop(['Flow_ID', '_Source_IP', '_Destination_IP', '_Timestamp'], axis = 1)
-dataset['Flow_Bytes/s'] = dataset['Flow_Bytes/s'].astype(float)
-dataset['_Flow_Packets/s'] = dataset['_Flow_Packets/s'].astype(float)
+    # Some manual processing on the dataframe
+    dataset = dataset.dropna()
+    dataset = dataset.drop(['Flow_ID', '_Source_IP', '_Destination_IP', '_Timestamp'], axis = 1, errors= 'ignore')
+    dataset['Flow_Bytes/s'] = dataset['Flow_Bytes/s'].astype(float)
+    dataset['_Flow_Packets/s'] = dataset['_Flow_Packets/s'].astype(float)
 
-# Creating X and Y from the dataset
-from sklearn import preprocessing
-le = preprocessing.LabelEncoder()
-le.fit(dataset['Label'])
-Y_attack = le.transform(dataset['Label'])
-print(list(le.classes_))
-print(np.unique(Y_attack))
-Y_class = dataset.iloc[:,-1].values
-X = dataset.iloc[:,0:80].values
-X = X.astype(int)'''
+    # Creating X and Y from the dataset
+    from sklearn import preprocessing
+    le = preprocessing.LabelEncoder()
+    le.fit(dataset['Label'])
+    Y_attack = le.transform(dataset['Label'])
+    print(list(le.classes_))
+    print(np.unique(Y_attack))
+    Y_class = dataset.iloc[:,-1].values
+    X = dataset.iloc[:,0:80].values
+    X = X.astype(int)
 
-# ==== Data processing for TRAbID 2017 ====
-from scipy.io import arff
-data = arff.loadarff('TRAbID2017_dataset.arff')
-dataset = pd.DataFrame(data[0])
-print(dataset.head())
-print(dataset.shape)
+else:
+    # ==== Data processing for TRAbID 2017 ====
+    from scipy.io import arff
+    dataset_name = 'TRAbID2017'
+    data = arff.loadarff('TRAbID2017_dataset.arff')
+    dataset = pd.DataFrame(data[0])
+    print(dataset.head())
+    print(dataset.shape)
 
-# Creating X and Y from the dataset
-X = dataset.iloc[:,0:43].values
-Y_class = pd.read_csv('TRAbID2017_dataset_Y_class.csv')
-Y_class = Y_class.iloc[:,:].values
+    # Creating X and Y from the dataset
+    X = dataset.iloc[:,0:43].values
+    Y_class = pd.read_csv('TRAbID2017_dataset_Y_class.csv')
+    Y_class = Y_class.iloc[:,:].values
 
 # Performing scale data
 scaler = MinMaxScaler().fit(X)
