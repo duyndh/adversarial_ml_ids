@@ -8,26 +8,27 @@ __status__ = "Prototype"
 
 
 # Generate a multilayer perceptron  model or ANN
+
 def mlp_model(X, Y):
     
     # Initializing the ANN
     model = Sequential()
     
     # Adding the input layer and the first hidden layer
-    model.add(Dense(output_dim = round(X.shape[1]/2), init =  'uniform', activation = 'relu', input_dim = X.shape[1]))
+    model.add(Dense(units = round(X.shape[1]/2), kernel_initializer = 'uniform', activation = 'relu', input_dim = X.shape[1]))
     
     # Adding the second hidden layer
-    model.add(Dense(output_dim = round(X.shape[1]/2), init =  'uniform', activation = 'relu'))
+    model.add(Dense(units = round(X.shape[1]/2), kernel_initializer = 'uniform', activation = 'relu'))
 
     
     if(len(np.unique(Y)) > 2): # Multi-classification task
         # Adding the output layer
-        model.add(Dense(output_dim = len(np.unique(Y)), init =  'uniform', activation = 'softmax'))
+        model.add(Dense(units = len(np.unique(Y)), kernel_initializer = 'uniform', activation = 'softmax'))
         # Compiling the ANN
         model.compile(optimizer = 'adam', loss = 'sparse_categorical_crossentropy', metrics = ['accuracy'])
     else: # Binary classification task
         # Adding the output layer
-        model.add(Dense(output_dim = 1, init =  'uniform', activation = 'sigmoid'))
+        model.add(Dense(units = 1, kernel_initializer = 'uniform', activation = 'sigmoid'))
         # Compiling the ANN
         model.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
     
@@ -58,10 +59,12 @@ def mlp_model_train(X, Y, val_split, batch_size, epochs_count):
 def mlp_model_eval(X, Y, history, flag):
     # Predicting the results given instances X
     Y_pred = model.predict_classes(X)
-    Y_pred = (Y_pred > 0.5)
+
+    Y_pred = [1 if y > 0.5 else 0 for y in Y_pred > 0.5]
+    Y = [1 if y > 0.5 else 0 for y in Y > 0.5]
 
     # Breakdown of statistical measure based on classes
-    print(classification_report(Y, Y_pred, digits=4))
+    print(classification_report(Y, Y_pred, digits=4, zero_division=0))
 
     # Making the cufusion Matrix
     cm = confusion_matrix(Y, Y_pred)
@@ -85,30 +88,30 @@ def mlp_model_eval(X, Y, history, flag):
     # Intilization of the figure
     myFig = plt.figure(figsize=[12,10])
 
-    plt.plot(history.history['acc'], linestyle = ':',lw = 2, alpha=0.8, color = 'black')
-    plt.plot(history.history['val_acc'], linestyle = '--',lw = 2, alpha=0.8, color = 'black')
+    plt.plot(history.history['accuracy'], linestyle = ':',lw = 2, alpha=0.8, color = 'black')
+    plt.plot(history.history['val_accuracy'], linestyle = '--',lw = 2, alpha=0.8, color = 'black')
     plt.title('Accuracy over Epoch', fontsize=20, weight='bold')
     plt.ylabel('Accuracy', fontsize=18, weight='bold')
     plt.xlabel('Epoch', fontsize=18, weight='bold')
     plt.legend(['Train', 'Validation'], loc='lower right', fontsize=14)
-    plt.xticks(ticks=range(0, len(history.history['acc'])))
+    plt.xticks(ticks=range(0, len(history.history['accuracy'])))
     
     plt.yticks(fontsize=16)
-    plt.show()
+    #plt.show()
         
     if(len(np.unique(Y))) == 2:
         if(flag == 1): #Regular
-            fileName = 'ANN_Accuracy_over_Epoch_Binary_Classification_TRAbIDRegular.eps'
+            fileName = 'ANN_Accuracy_over_Epoch_Binary_Classification_TRAbIDRegular.png'
         else: #Adversarial
-            fileName = 'ANN_Accuracy_over_Epoch_Binary_Classification_TRAbID_Adversarial.eps'
+            fileName = 'ANN_Accuracy_over_Epoch_Binary_Classification_TRAbID_Adversarial.png'
     else:
         if(flag == 1): #Regular
-            fileName = 'ANN_Accuracy_over_Epoch_Multiclass_Classification_TRAbID_Regular.eps'
+            fileName = 'ANN_Accuracy_over_Epoch_Multiclass_Classification_TRAbID_Regular.png'
         else: #Adversarial
-            fileName = 'ANN_Accuracy_over_Epoch_Multiclass_Classification_TRAbID_Adversarial.eps'
+            fileName = 'ANN_Accuracy_over_Epoch_Multiclass_Classification_TRAbID_Adversarial.png'
     
     # Saving the figure
-    myFig.savefig(fileName, format='eps', dpi=1200)
+    myFig.savefig("TestResults\\" + fileName, format='png', dpi=1200)
     
     # ------------ Print Loss over Epoch --------------------
 
@@ -125,21 +128,21 @@ def mlp_model_eval(X, Y, history, flag):
     plt.xticks(ticks=range(0, len(history.history['loss'])))
     
     plt.yticks(fontsize=16)
-    plt.show()
+    #plt.show()
         
     if(len(np.unique(Y))) == 2:
         if(flag == 1): #Regular
-            fileName = 'ANN_Loss_over_Epoch_Binary_Classification_TRAbID_Regular.eps'
+            fileName = 'ANN_Loss_over_Epoch_Binary_Classification_TRAbID_Regular.png'
         else: #Adversarial 
-            fileName = 'ANN_Loss_over_Epoch_Binary_Classification_TRAbID_Adversarial.eps'
+            fileName = 'ANN_Loss_over_Epoch_Binary_Classification_TRAbID_Adversarial.png'
     else:
         if(flag == 1): #Regular
-            fileName = 'ANN_Loss_over_Epoch_Multiclass_Classification_TRAbID_Regular.eps'
+            fileName = 'ANN_Loss_over_Epoch_Multiclass_Classification_TRAbID_Regular.png'
         else: #Adversarial
-            fileName = 'ANN_Loss_over_Epoch_Multiclass_Classification_TRAbID_Adversarial.eps'
+            fileName = 'ANN_Loss_over_Epoch_Multiclass_Classification_TRAbID_Adversarial.png'
     
     # Saving the figure
-    myFig.savefig(fileName, format='eps', dpi=1200)
+    myFig.savefig("TestResults\\" + fileName, format='png', dpi=1200)
     
     
     # ------------ ROC Curve --------------------
@@ -162,15 +165,15 @@ def mlp_model_eval(X, Y, history, flag):
         plt.legend(loc="lower right",fontsize=14)
         plt.xticks(fontsize=16)
         plt.yticks(fontsize=16)
-        plt.show()
+        #plt.show()
         
         if(flag == 1): #Regular
-            fileName = 'ANN_Binary_Classification_ROC_TRAbID_Regular.eps'
+            fileName = 'ANN_Binary_Classification_ROC_TRAbID_Regular.png'
         else: #Adversarial
-            fileName = 'ANN_Binary_Classification_ROC_TRAbID_Adversarial.eps'
+            fileName = 'ANN_Binary_Classification_ROC_TRAbID_Adversarial.png'
 
         # Saving the figure
-        myFig.savefig(fileName, format='eps', dpi=1200)
+        myFig.savefig("TestResults\\" + fileName, format='png', dpi=1200)
 
 
 # import libraries
@@ -195,6 +198,11 @@ from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.callbacks import EarlyStopping
+
+import os
+
+if not os.path.exists("TestResults"):
+    os.makedirs("TestResults")
 
 #importing the data set
 # ==== Data processing for CICIDS 2017 ====
