@@ -6,6 +6,18 @@ __maintainer__ = "Md. Ahsan Ayub"
 __email__ = "mayub42@students.tntech.edu"
 __status__ = "Prototype"
 
+from contextlib import redirect_stdout
+def log(obj, new_line=True):
+    with open("TestResults\\log_" + dataset_name + ".txt", "a") as file_log:
+        with redirect_stdout(file_log):
+            if new_line:
+                print(obj)
+            else:
+                print(obj, end=" ")
+
+def log2(obj1, obj2):
+    log(obj1, new_line=False)
+    log(obj2)
 
 # Generate a multilayer perceptron  model or ANN
 
@@ -32,7 +44,7 @@ def mlp_model(X, Y):
         # Compiling the ANN
         model.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
     
-    print(model.summary())
+    log(model.summary())
     
     return model
 
@@ -50,8 +62,8 @@ def mlp_model_train(X, Y, val_split, batch_size, epochs_count):
                    epochs = epochs_count,
                    shuffle=True)
 
-    print(history.history)
-    print(model.summary())
+    log(history.history)
+    log(model.summary())
     return history
 
 
@@ -64,24 +76,24 @@ def mlp_model_eval(X, Y, history, flag):
     Y = [1 if y > 0.5 else 0 for y in Y > 0.5]
 
     # Breakdown of statistical measure based on classes
-    print(classification_report(Y, Y_pred, digits=4, zero_division=0))
+    log(classification_report(Y, Y_pred, digits=4, zero_division=0))
 
     # Making the cufusion Matrix
     cm = confusion_matrix(Y, Y_pred)
-    print("Confusion Matrix:\n", cm)
-    print("Accuracy: ", accuracy_score(Y, Y_pred))
+    log2("Confusion Matrix:\n", cm)
+    log2("Accuracy: ", accuracy_score(Y, Y_pred))
 
     if(len(np.unique(Y))) == 2:
-        print("F1: ", f1_score(Y, Y_pred, average='binary'))
-        print("Precison: ", precision_score(Y, Y_pred, average='binary'))
-        print("Recall: ", recall_score(Y, Y_pred, average='binary'))
+        log2("F1: ", f1_score(Y, Y_pred, average='binary'))
+        log2("Precison: ", precision_score(Y, Y_pred, average='binary'))
+        log2("Recall: ", recall_score(Y, Y_pred, average='binary'))
     else:
         f1_scores = f1_score(Y, Y_pred, average=None)
-        print("F1: ", np.mean(f1_scores))
+        log2("F1: ", np.mean(f1_scores))
         precision_scores = precision_score(Y, Y_pred, average=None)
-        print("Precison: ", np.mean(precision_scores))
+        log2("Precison: ", np.mean(precision_scores))
         recall_scores = recall_score(Y, Y_pred, average=None)
-        print("Recall: ", np.mean(recall_scores))
+        log2("Recall: ", np.mean(recall_scores))
 
     # ------------ Print Accuracy over Epoch --------------------
 
@@ -99,19 +111,23 @@ def mlp_model_eval(X, Y, history, flag):
     plt.yticks(fontsize=16)
     #plt.show()
         
+    fileName = ''
     if(len(np.unique(Y))) == 2:
         if(flag == 1): #Regular
-            fileName = 'ANN_Accuracy_over_Epoch_Binary_Classification_' + dataset_name + 'Regular.png'
+            fileName = dataset_name + '_ANN_Binary_Classification_Accuracy_over_Epoch_Regular.png'
         else: #Adversarial
-            fileName = 'ANN_Accuracy_over_Epoch_Binary_Classification_' + dataset_name + '_Adversarial.png'
+            pass
+            #fileName = dataset_name + '_ANN_Binary_Classification_Accuracy_over_Epoch_Adversarial.png'
     else:
         if(flag == 1): #Regular
-            fileName = 'ANN_Accuracy_over_Epoch_Multiclass_Classification_' + dataset_name + '_Regular.png'
+            fileName = dataset_name + '_ANN_Multiclass_Classification_Accuracy_over_Epoch_Regular.png'
         else: #Adversarial
-            fileName = 'ANN_Accuracy_over_Epoch_Multiclass_Classification_' + dataset_name + '_Adversarial.png'
+            pass
+            #fileName = dataset_name + '_ANN_Multiclass_Classification_Accuracy_over_Epoch_Adversarial.png'
     
     # Saving the figure
-    myFig.savefig("TestResults\\" + fileName, format='png', dpi=1200)
+    if len(fileName) > 0:
+        myFig.savefig("TestResults\\" + fileName, format='png', dpi=1200)
     
     # ------------ Print Loss over Epoch --------------------
 
@@ -130,19 +146,23 @@ def mlp_model_eval(X, Y, history, flag):
     plt.yticks(fontsize=16)
     #plt.show()
         
+    fileName = ''
     if(len(np.unique(Y))) == 2:
         if(flag == 1): #Regular
-            fileName = 'ANN_Loss_over_Epoch_Binary_Classification_' + dataset_name + '_Regular.png'
+            fileName = dataset_name + '_ANN_Binary_Classification_Loss_over_Epoch_Regular.png'
         else: #Adversarial 
-            fileName = 'ANN_Loss_over_Epoch_Binary_Classification_' + dataset_name + '_Adversarial.png'
+            pass
+            #fileName = dataset_name + '_ANN_Binary_Classification_Loss_over_Epoch_Adversarial.png'
     else:
         if(flag == 1): #Regular
-            fileName = 'ANN_Loss_over_Epoch_Multiclass_Classification_' + dataset_name + '_Regular.png'
+            fileName = dataset_name + '_ANN_Multiclass_Classification_Loss_over_Epoch_Regular.png'
         else: #Adversarial
-            fileName = 'ANN_Loss_over_Epoch_Multiclass_Classification_' + dataset_name + '_Adversarial.png'
+            pass
+            #fileName = dataset_name + '_ANN_Multiclass_Classification_Loss_over_Epoch_Adversarial.png'
     
     # Saving the figure
-    myFig.savefig("TestResults\\" + fileName, format='png', dpi=1200)
+    if len(fileName) > 0:
+        myFig.savefig("TestResults\\" + fileName, format='png', dpi=1200)
     
     
     # ------------ ROC Curve --------------------
@@ -167,13 +187,15 @@ def mlp_model_eval(X, Y, history, flag):
         plt.yticks(fontsize=16)
         #plt.show()
         
+        fileName = ''
         if(flag == 1): #Regular
-            fileName = 'ANN_Binary_Classification_ROC_' + dataset_name + '_Regular.png'
+            fileName = dataset_name + '_ANN_Binary_Classification_ROC_Regular.png'
         else: #Adversarial
-            fileName = 'ANN_Binary_Classification_ROC_' + dataset_name + '_Adversarial.png'
+            fileName = dataset_name + '_ANN_Binary_Classification_ROC_Adversarial.png'
 
         # Saving the figure
-        myFig.savefig("TestResults\\" + fileName, format='png', dpi=1200)
+        if len(fileName) > 0:
+            myFig.savefig("TestResults\\" + fileName, format='png', dpi=1200)
 
 
 # import libraries
@@ -213,8 +235,9 @@ dataset_name = ""
 if use_CICIDS2017_dataset:
     dataset_name = 'CICIDS2017'
     dataset = pd.read_csv('CICIDS2017_dataset.csv')
-    print(dataset.head())
-    print(dataset.shape)
+    log("================================")
+    log(dataset.head())
+    log(dataset.shape)
 
     # Some manual processing on the dataframe
     dataset = dataset.dropna()
@@ -227,8 +250,8 @@ if use_CICIDS2017_dataset:
     le = preprocessing.LabelEncoder()
     le.fit(dataset['Label'])
     Y_attack = le.transform(dataset['Label'])
-    print(list(le.classes_))
-    print(np.unique(Y_attack))
+    log(list(le.classes_))
+    log(np.unique(Y_attack))
     Y_class = dataset.iloc[:,-1].values
     X = dataset.iloc[:,0:80].values
     X = X.astype(int)
@@ -239,13 +262,16 @@ else:
     dataset_name = 'TRAbID2017'
     data = arff.loadarff('TRAbID2017_dataset.arff')
     dataset = pd.DataFrame(data[0])
-    print(dataset.head())
-    print(dataset.shape)
+    log("================================")
+    log(dataset.head())
+    log(dataset.shape)
 
     # Creating X and Y from the dataset
     X = dataset.iloc[:,0:43].values
     Y_class = pd.read_csv('TRAbID2017_dataset_Y_class.csv')
     Y_class = Y_class.iloc[:,:].values
+
+    Y_class = (1 - Y_class)
 
 # Performing scale data
 scaler = MinMaxScaler().fit(X)
@@ -253,7 +279,7 @@ X_scaled = np.array(scaler.transform(X))
 
 X_train, X_test, Y_train, Y_test = train_test_split(X_scaled, Y_class, test_size = 0.2, random_state = 42, stratify=Y_class)
 
-print("Data Processing has been performed.")
+log("Data Processing has been performed.")
 
 # Tensorflow  placeholder  variables
 X_placeholder = tf.placeholder(tf.float32 , shape=(None , X_train.shape[1]))
@@ -266,7 +292,7 @@ init = tf.global_variables_initializer()
 sess.run(init)
 
 predictions = model(X_placeholder)
-print('Prediction: ', predictions)
+log2('Prediction: ', predictions)
 
 # ============== Training the model ==============
 history = mlp_model_train(X_train, Y_train,
@@ -277,7 +303,7 @@ history = mlp_model_train(X_train, Y_train,
 
 # ============== Evaluation of the model with actual instances ==============
 
-print("Performance when using actual testing instances")
+log("Performance when using actual testing instances")
 mlp_model_eval(X_test, Y_test, history, 1)
 
 
@@ -316,5 +342,5 @@ for sample_ind in range(0, source_samples):
 
 # ============== Evaluation of the model with adversarial instances ==============
 
-print("Performance when using adversarial testing instances")
+log("Performance when using adversarial testing instances")
 mlp_model_eval(X_adv, Y_test, history, 2)
