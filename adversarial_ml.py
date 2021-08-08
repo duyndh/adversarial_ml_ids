@@ -206,7 +206,7 @@ import matplotlib.pyplot as plt
 
 # importing cleverhans - an adversarial example library
 from cleverhans.attacks import SaliencyMapMethod
-from cleverhans.attacks_tf import jacobian_graph
+from cleverhans.attacks_tf import jacobian_graph, jsma, jsma_symbolic
 #from cleverhans.attacks import FastGradientMethod
 #from cleverhans.utils_tf import model_train, model_eval, batch_eval
 
@@ -226,7 +226,7 @@ import os
 if not os.path.exists("TestResults"):
     os.makedirs("TestResults")
 
-use_CICIDS2017_dataset = False
+use_CICIDS2017_dataset = True
 dataset_name = ""
 
 #importing the data set
@@ -321,18 +321,18 @@ X_adv = np.zeros((source_samples, X_test.shape[1]))
 for sample_ind in range(0, source_samples):
     # We want to find an  adversarial  example  for  each  possible  target  class
     # (i.e. all  classes  that  differ  from  the  label  given  in the  dataset)
-    current_class = int(np.argmax(Y_test[sample_ind]))
+    current_class = int(np.amax(Y_test[sample_ind]))
     
     # Target the benign class
     for target in [0]:
-        if (current_class == 0):
+        if current_class != target:
             break
-        
+
         # This call runs the Jacobian-based saliency map approac
-        adv_x , res , percent_perturb = SaliencyMapMethod(sess, X_placeholder, predictions , grads,
+        adv_x, res, percent_perturb = jsma(sess, X_placeholder, predictions , grads,
                                              X_test[sample_ind: (sample_ind+1)],
                                              target , theta=1, gamma =0.1,
-                                             increase=True ,
+                                             #increase=True ,
                                              clip_min=0, clip_max=1)
         
         X_adv[sample_ind] = adv_x
